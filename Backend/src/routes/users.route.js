@@ -33,4 +33,30 @@ router.post('/register', async (req,res)=>{
     }
 });
 
+//Sign Up
+router.post('/signup', async (req,res)=>{
+    try{
+        const {email , password} = req.body;
+
+        const user = await User.findOne({ email });
+        if(!user){
+            return res.status(400).json({message:"Invaild email or password"})
+        }
+        //Compare Password
+        const isMatch = await bcrypt.compare(password, user.password)
+        if(!isMatch){
+            return res.status(400).json({message:"Invaild email or password"})
+        }
+
+        //Generate JWT Token
+        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET,{
+            expiresIn:'3d'
+        });
+        res.status(200).json({message:"Login Successfully", token})
+
+    }catch(error){
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router ;
