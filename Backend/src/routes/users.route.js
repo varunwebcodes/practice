@@ -85,10 +85,27 @@ router.post('/login', async(req,res)=>{
     }
 });
 
+//Protected Route
 router.get('/profile', authMiddleware, async(req,res)=>{
     try{
         const user = await User.findById(req.user.id).select('-password');
         res.status(200).json({ user })
+    }catch(error){
+        res.status(500).json({error: error.message})
+    }
+})
+
+//Update Profile Route
+router.put('/update', authMiddleware , async(req,res)=>{
+    try{
+        const { name , email } = req.body;
+
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            {name , email},
+            {returnDocument : 'after'}
+        ).select('-password');
+        res.status(200).json({message:"Profile updated successfully" , user});
     }catch(error){
         res.status(500).json({error: error.message})
     }
